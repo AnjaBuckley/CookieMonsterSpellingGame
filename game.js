@@ -273,7 +273,7 @@ function createLetterSlots() {
 }
 
 /**
- * Place Cookie Monster on the board
+ * Place Cookie Monster on the board using a custom PNG image
  */
 function placeCookieMonster() {
     // Random starting position
@@ -284,22 +284,17 @@ function placeCookieMonster() {
     
     const cell = getCellAtPosition(x, y);
     
+    // Create an image element instead of the CSS-based Cookie Monster
     const cookieMonster = document.createElement('div');
     cookieMonster.className = 'cookie-monster';
     
-    const eyes = document.createElement('div');
-    eyes.className = 'cookie-monster-eyes';
+    // Create and add the image
+    const cookieMonsterImg = document.createElement('img');
+    cookieMonsterImg.src = 'cookie-monster.png'; // Use your custom PNG file
+    cookieMonsterImg.alt = 'Cookie Monster';
+    cookieMonsterImg.className = 'cookie-monster-img';
     
-    const leftEye = document.createElement('div');
-    leftEye.className = 'eye';
-    
-    const rightEye = document.createElement('div');
-    rightEye.className = 'eye';
-    
-    eyes.appendChild(leftEye);
-    eyes.appendChild(rightEye);
-    cookieMonster.appendChild(eyes);
-    
+    cookieMonster.appendChild(cookieMonsterImg);
     cell.appendChild(cookieMonster);
 }
 
