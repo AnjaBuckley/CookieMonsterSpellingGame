@@ -9,7 +9,8 @@ const CONFIG = {
     initialDifficulty: 1,
     pointsPerLetter: 10,
     wordCompletionBonus: 50,
-    movementDelay: 200
+    movementDelay: 200,
+    defaultMusicVolume: 0.5
 };
 
 // Game state
@@ -21,7 +22,8 @@ const gameState = {
     cookieMonsterPosition: { x: 0, y: 0 },
     letterPositions: [],
     canMove: true,
-    difficulty: CONFIG.initialDifficulty
+    difficulty: CONFIG.initialDifficulty,
+    musicPlaying: true
 };
 
 // DOM Elements
@@ -41,6 +43,12 @@ const nomSound = document.getElementById('nom-sound');
 const errorSound = document.getElementById('error-sound');
 const completeSound = document.getElementById('complete-sound');
 
+// Background music
+const backgroundMusic = document.getElementById('background-music');
+const toggleMusicButton = document.getElementById('toggle-music');
+const musicIcon = document.getElementById('music-icon');
+const volumeSlider = document.getElementById('volume-slider');
+
 // Control buttons
 const upButton = document.getElementById('up-btn');
 const downButton = document.getElementById('down-btn');
@@ -53,7 +61,89 @@ const rightButton = document.getElementById('right-btn');
 function initGame() {
     createGameBoard();
     setupEventListeners();
+    setupBackgroundMusic();
     startNewWord();
+}
+
+/**
+ * Set up background music
+ */
+function setupBackgroundMusic() {
+    console.log("Setting up background music");
+    
+    // Set initial volume
+    backgroundMusic.volume = CONFIG.defaultMusicVolume;
+    volumeSlider.value = CONFIG.defaultMusicVolume;
+    
+    // Event for when the music is loaded
+    backgroundMusic.addEventListener('canplaythrough', () => {
+        console.log("Music loaded and ready to play");
+    });
+    
+    // Event for if there's an error loading the music
+    backgroundMusic.addEventListener('error', (e) => {
+        console.error("Error loading music:", e);
+        console.error("Music src:", backgroundMusic.src);
+    });
+    
+    // Start playing the music with user interaction
+    toggleMusicButton.addEventListener('click', toggleMusic);
+    
+    // Set up volume slider
+    volumeSlider.addEventListener('input', () => {
+        backgroundMusic.volume = volumeSlider.value;
+    });
+    
+    // Try to autoplay (will likely be blocked by browsers)
+    try {
+        backgroundMusic.play()
+            .then(() => {
+                console.log("Music started playing");
+                gameState.musicPlaying = true;
+                musicIcon.textContent = '🔊';
+            })
+            .catch(error => {
+                console.log('Autoplay prevented:', error);
+                gameState.musicPlaying = false;
+                musicIcon.textContent = '🔇';
+                toggleMusicButton.classList.add('muted');
+            });
+    } catch (error) {
+        console.log('Error trying to play music:', error);
+        gameState.musicPlaying = false;
+        musicIcon.textContent = '🔇';
+        toggleMusicButton.classList.add('muted');
+    }
+}
+
+/**
+ * Toggle background music play/pause
+ */
+function toggleMusic() {
+    console.log("Toggle music called. Current state:", gameState.musicPlaying);
+    
+    if (gameState.musicPlaying) {
+        backgroundMusic.pause();
+        musicIcon.textContent = '🔇';
+        toggleMusicButton.classList.add('muted');
+        gameState.musicPlaying = false;
+        console.log("Music paused");
+    } else {
+        // Make sure the file is loaded
+        backgroundMusic.load();
+        backgroundMusic.play()
+            .then(() => {
+                console.log("Music started playing");
+                musicIcon.textContent = '🔊';
+                toggleMusicButton.classList.remove('muted');
+                gameState.musicPlaying = true;
+            })
+            .catch(error => {
+                console.error("Failed to play music:", error);
+                // Show error message to user
+                messageBox.textContent = "Could not play music. Click again to retry.";
+            });
+    }
 }
 
 /**
@@ -115,6 +205,11 @@ function handleKeyPress(event) {
             break;
         case 'ArrowRight':
             movePlayer(1, 0);
+            event.preventDefault();
+            break;
+        case 'm':
+            // Toggle music with M key
+            toggleMusic();
             event.preventDefault();
             break;
     }
