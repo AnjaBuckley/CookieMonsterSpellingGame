@@ -13,12 +13,15 @@ const CONFIG = {
     defaultMusicVolume: 0.5,
     broccoliCount: 1,  // Single broccoli that chases
     broccoliMoveDelay: 1000,  // How often broccoli moves (in ms)
-    defaultWordsPerDifficulty: 5
+    defaultWordsPerDifficulty: 5,
+    initialLives: 3,  // Starting number of lives
+    broccoliPenalty: 20  // Points lost when hitting broccoli
 };
 
 // Game state
 const gameState = {
     score: 0,
+    lives: CONFIG.initialLives,
     currentWord: null,
     targetWord: '',
     collectedLetters: '',
@@ -35,6 +38,7 @@ const gameState = {
 // DOM Elements
 const gameBoard = document.getElementById('game-board');
 const scoreDisplay = document.getElementById('score');
+const livesDisplay = document.getElementById('lives');
 const currentWordDisplay = document.getElementById('current-word');
 const wordTranslationDisplay = document.getElementById('word-translation');
 const collectedLettersDisplay = document.getElementById('collected-letters');
@@ -546,9 +550,9 @@ function updateScore(points) {
     
     // Show score animation
     const scoreAnimation = document.createElement('div');
-    scoreAnimation.textContent = `+${points}`;
+    scoreAnimation.textContent = points > 0 ? `+${points}` : points;
     scoreAnimation.style.position = 'absolute';
-    scoreAnimation.style.color = '#0078d7';
+    scoreAnimation.style.color = points > 0 ? '#0078d7' : '#ff4444';
     scoreAnimation.style.fontWeight = 'bold';
     scoreAnimation.style.fontSize = '24px';
     scoreAnimation.style.top = `${scoreDisplay.getBoundingClientRect().top}px`;
@@ -558,14 +562,32 @@ function updateScore(points) {
     
     document.body.appendChild(scoreAnimation);
     
+    // Flash the score display
+    scoreDisplay.classList.add('score-flash');
+    if (points < 0) {
+        scoreDisplay.classList.add('score-decrease');
+    }
+    
     setTimeout(() => {
         scoreAnimation.style.transform = 'translateY(-20px)';
         scoreAnimation.style.opacity = '0';
+        scoreDisplay.classList.remove('score-flash', 'score-decrease');
     }, 50);
     
     setTimeout(() => {
         document.body.removeChild(scoreAnimation);
     }, 1000);
+}
+
+/**
+ * Update the lives display
+ */
+function updateLives() {
+    livesDisplay.textContent = gameState.lives;
+    livesDisplay.classList.add('score-flash');
+    setTimeout(() => {
+        livesDisplay.classList.remove('score-flash');
+    }, 300);
 }
 
 /**
@@ -678,7 +700,20 @@ function startBroccoliMovement() {
  */
 function handleBroccoliCatch() {
     notVeggieSound.play();
-    messageBox.textContent = 'Oh no! The broccoli caught Cookie Monster!';
+    gameState.lives--;
+    updateLives();
+    
+    // Reduce score
+    updateScore(-CONFIG.broccoliPenalty);
+    
+    if (gameState.lives <= 0) {
+        // Game Over
+        messageBox.textContent = `Game Over! The broccoli won! Final Score: ${gameState.score}`;
+        stopGame();
+        return;
+    }
+    
+    messageBox.textContent = `Oh no! The broccoli caught Cookie Monster! ${gameState.lives} ${gameState.lives === 1 ? 'life' : 'lives'} remaining!`;
     gameState.canMove = false;
     
     // Stop broccoli movement
@@ -776,7 +811,9 @@ function startGame() {
     console.log('Starting game...');
     gameState.isGameRunning = true;
     gameState.score = 0;
+    gameState.lives = CONFIG.initialLives;
     scoreDisplay.textContent = '0';
+    updateLives();
     
     // Update button states
     startGameBtn.disabled = true;

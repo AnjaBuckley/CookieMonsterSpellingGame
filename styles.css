@@ -77,6 +77,32 @@ h1 {
     border-radius: 20px;
     font-size: 18px;
     font-weight: bold;
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+.lives-display {
+    border-left: 2px solid rgba(255, 255, 255, 0.3);
+    padding-left: 15px;
+    display: flex;
+    gap: 5px;
+    align-items: center;
+}
+
+/* Score animation */
+@keyframes scoreChange {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+.score-flash {
+    animation: scoreChange 0.3s ease-in-out;
+}
+
+.score-decrease {
+    color: #ff4444;
 }
 
 /* Music Controls */
