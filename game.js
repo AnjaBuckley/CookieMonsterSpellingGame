@@ -32,7 +32,8 @@ const gameState = {
     difficulty: CONFIG.initialDifficulty,
     musicPlaying: true,
     broccoliMoveTimer: null,  // Timer for broccoli movement
-    isGameRunning: false
+    isGameRunning: false,
+    isInvulnerable: false  // New state to track invulnerability
 };
 
 // DOM Elements
@@ -299,6 +300,9 @@ function handleKeyPress(event) {
  */
 function startNewWord() {
     console.log('Starting new word...');
+    
+    // Reset invulnerability
+    gameState.isInvulnerable = false;
     
     // Stop any existing broccoli movement
     if (gameState.broccoliMoveTimer) {
@@ -597,6 +601,9 @@ function completeWord() {
     // Play completion sound
     completeSound.play();
     
+    // Make Cookie Monster invulnerable during celebration
+    gameState.isInvulnerable = true;
+    
     // Add bonus points
     updateScore(CONFIG.wordCompletionBonus);
     
@@ -699,6 +706,11 @@ function startBroccoliMovement() {
  * Handle when broccoli catches Cookie Monster
  */
 function handleBroccoliCatch() {
+    // Don't handle catch if Cookie Monster is invulnerable
+    if (gameState.isInvulnerable) {
+        return;
+    }
+
     notVeggieSound.play();
     gameState.lives--;
     updateLives();
@@ -708,8 +720,7 @@ function handleBroccoliCatch() {
     
     if (gameState.lives <= 0) {
         // Game Over
-        messageBox.textContent = `Game Over! The broccoli won! Final Score: ${gameState.score}`;
-        stopGame();
+        showGameOver();
         return;
     }
     
@@ -725,6 +736,25 @@ function handleBroccoliCatch() {
     setTimeout(() => {
         startNewWord();
     }, 2000);
+}
+
+/**
+ * Show game over message
+ */
+function showGameOver() {
+    // Create game over overlay
+    const overlay = document.createElement('div');
+    overlay.className = 'game-over-overlay';
+    
+    const gameOverText = document.createElement('div');
+    gameOverText.className = 'game-over-text';
+    gameOverText.textContent = 'GAME OVER';
+    
+    overlay.appendChild(gameOverText);
+    gameBoard.appendChild(overlay);
+    
+    messageBox.textContent = `Game Over! The broccoli won! Final Score: ${gameState.score}`;
+    stopGame();
 }
 
 /**
@@ -835,6 +865,7 @@ function startGame() {
 function stopGame() {
     console.log('Stopping game...');
     gameState.isGameRunning = false;
+    gameState.isInvulnerable = false;
     
     // Clear the board
     clearBoard();
@@ -854,9 +885,6 @@ function stopGame() {
         btn.style.opacity = '1';
         btn.style.cursor = 'pointer';
     });
-    
-    // Show game over message
-    messageBox.textContent = `Game Over! Final Score: ${gameState.score}`;
 }
 
 // Wait for DOM to be fully loaded before initializing
