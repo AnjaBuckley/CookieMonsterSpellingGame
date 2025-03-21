@@ -28,7 +28,8 @@ const gameState = {
     canMove: true,
     difficulty: CONFIG.initialDifficulty,
     musicPlaying: true,
-    broccoliMoveTimer: null  // Timer for broccoli movement
+    broccoliMoveTimer: null,  // Timer for broccoli movement
+    isGameRunning: false
 };
 
 // DOM Elements
@@ -70,6 +71,11 @@ const toggleVocabBtn = document.getElementById('toggle-vocab');
 const wordCountInput = document.getElementById('word-count');
 const apiStatus = document.getElementById('api-status');
 
+// Additional DOM Elements
+const startGameBtn = document.getElementById('start-game');
+const stopGameBtn = document.getElementById('stop-game');
+const difficultyBtns = document.querySelectorAll('.difficulty-btn');
+
 /**
  * Initialize the game
  */
@@ -79,7 +85,8 @@ function initGame() {
     // Make sure all DOM elements are available
     if (!gameBoard || !scoreDisplay || !currentWordDisplay || !wordTranslationDisplay || 
         !collectedLettersDisplay || !messageBox || !levelCompleteModal || 
-        !completedWordDisplay || !wordMeaningDisplay || !nextWordButton) {
+        !completedWordDisplay || !wordMeaningDisplay || !nextWordButton ||
+        !startGameBtn || !stopGameBtn) {
         console.error('Some game elements are missing from the DOM');
         return;
     }
@@ -88,7 +95,9 @@ function initGame() {
     setupEventListeners();
     setupBackgroundMusic();
     setupSettings();
-    startNewWord();
+    
+    // Show initial message
+    messageBox.textContent = 'Click "Start Game" to begin!';
 }
 
 /**
@@ -201,22 +210,51 @@ function createGameBoard() {
 }
 
 /**
- * Set up event listeners for keyboard and button controls
+ * Set up event listeners
  */
 function setupEventListeners() {
-    // Keyboard controls
-    document.addEventListener('keydown', handleKeyPress);
+    // Game controls
+    startGameBtn.addEventListener('click', startGame);
+    stopGameBtn.addEventListener('click', stopGame);
     
-    // Button controls
-    upButton.addEventListener('click', () => movePlayer(0, -1));
-    downButton.addEventListener('click', () => movePlayer(0, 1));
-    leftButton.addEventListener('click', () => movePlayer(-1, 0));
-    rightButton.addEventListener('click', () => movePlayer(1, 0));
+    // Keyboard controls (only active when game is running)
+    document.addEventListener('keydown', (event) => {
+        if (!gameState.isGameRunning) return;
+        handleKeyPress(event);
+    });
+    
+    // Button controls (only active when game is running)
+    upButton.addEventListener('click', () => {
+        if (gameState.isGameRunning) movePlayer(0, -1);
+    });
+    downButton.addEventListener('click', () => {
+        if (gameState.isGameRunning) movePlayer(0, 1);
+    });
+    leftButton.addEventListener('click', () => {
+        if (gameState.isGameRunning) movePlayer(-1, 0);
+    });
+    rightButton.addEventListener('click', () => {
+        if (gameState.isGameRunning) movePlayer(1, 0);
+    });
     
     // Next word button
     nextWordButton.addEventListener('click', () => {
-        levelCompleteModal.style.display = 'none';
-        startNewWord();
+        if (gameState.isGameRunning) {
+            levelCompleteModal.style.display = 'none';
+            startNewWord();
+        }
+    });
+    
+    // Difficulty buttons
+    difficultyBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            // Only allow difficulty change when game is not running
+            if (!gameState.isGameRunning) {
+                difficultyBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                gameState.difficulty = parseInt(btn.dataset.difficulty);
+            }
+        });
     });
 }
 
@@ -751,6 +789,59 @@ function setupSettings() {
 function showApiStatus(message, isError = false) {
     apiStatus.textContent = message;
     apiStatus.className = 'api-status' + (isError ? ' error' : ' success');
+}
+
+/**
+ * Start the game
+ */
+function startGame() {
+    console.log('Starting game...');
+    gameState.isGameRunning = true;
+    gameState.score = 0;
+    scoreDisplay.textContent = '0';
+    
+    // Update button states
+    startGameBtn.disabled = true;
+    stopGameBtn.disabled = false;
+    
+    // Disable difficulty selection
+    difficultyBtns.forEach(btn => {
+        btn.style.opacity = '0.5';
+        btn.style.cursor = 'not-allowed';
+    });
+    
+    // Start first word
+    startNewWord();
+}
+
+/**
+ * Stop the game
+ */
+function stopGame() {
+    console.log('Stopping game...');
+    gameState.isGameRunning = false;
+    
+    // Clear the board
+    clearBoard();
+    
+    // Stop broccoli movement
+    if (gameState.broccoliMoveTimer) {
+        clearInterval(gameState.broccoliMoveTimer);
+        gameState.broccoliMoveTimer = null;
+    }
+    
+    // Update button states
+    startGameBtn.disabled = false;
+    stopGameBtn.disabled = true;
+    
+    // Enable difficulty selection
+    difficultyBtns.forEach(btn => {
+        btn.style.opacity = '1';
+        btn.style.cursor = 'pointer';
+    });
+    
+    // Show game over message
+    messageBox.textContent = `Game Over! Final Score: ${gameState.score}`;
 }
 
 // Wait for DOM to be fully loaded before initializing

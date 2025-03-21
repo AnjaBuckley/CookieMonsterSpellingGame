@@ -16,7 +16,12 @@
             </div>
         </header>
         
-        <!-- Add settings panel -->
+        <div class="game-controls">
+            <button id="start-game" class="control-btn primary">Start Game</button>
+            <button id="stop-game" class="control-btn danger" disabled>Stop Game</button>
+        </div>
+        
+        <!-- Settings panel -->
         <div class="settings-panel">
             <button class="settings-toggle-btn" id="settings-toggle">
                 <span>⚙️</span> Settings
@@ -29,6 +34,14 @@
                 <div class="word-count-container">
                     <label for="word-count">Words per difficulty:</label>
                     <input type="number" id="word-count" value="5" min="1" max="10">
+                </div>
+                <div class="difficulty-controls">
+                    <label>Starting Difficulty:</label>
+                    <div class="difficulty-buttons">
+                        <button class="difficulty-btn active" data-difficulty="1">Easy</button>
+                        <button class="difficulty-btn" data-difficulty="2">Medium</button>
+                        <button class="difficulty-btn" data-difficulty="3">Hard</button>
+                    </div>
                 </div>
                 <div class="api-status" id="api-status"></div>
             </div>

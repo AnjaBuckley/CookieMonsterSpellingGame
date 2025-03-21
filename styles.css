@@ -419,40 +419,125 @@ h1 {
     animation: moveToNewPosition 0.2s ease-out;
 }
 
-/* Controls Styles */
-.controls {
+/* Game Controls */
+.game-controls {
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 5px;
+    justify-content: center;
+    gap: 20px;
     margin-bottom: 20px;
 }
 
-.controls-row {
-    display: flex;
-    gap: 5px;
-}
-
-.control-btn {
-    width: 60px;
-    height: 60px;
-    font-size: 24px;
-    background-color: #3a86ff;
+.control-btn.primary {
+    background-color: #4CAF50;
     color: white;
     border: none;
-    border-radius: 10px;
+    border-radius: 8px;
+    padding: 12px 24px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.control-btn.primary:hover {
+    background-color: #45a049;
+}
+
+.control-btn.danger {
+    background-color: #f44336;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 24px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.control-btn.danger:hover {
+    background-color: #da190b;
+}
+
+.control-btn:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+/* Settings Panel */
+.settings-panel {
+    margin-bottom: 20px;
+    position: relative;
+}
+
+.settings-toggle-btn {
+    background-color: #2196F3;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-size: 16px;
     cursor: pointer;
     display: flex;
-    justify-content: center;
     align-items: center;
+    gap: 8px;
+    margin: 0 auto;
+    transition: all 0.3s ease;
 }
 
-.control-btn:hover {
-    background-color: #2563eb;
+.settings-toggle-btn:hover {
+    background-color: #1976D2;
 }
 
-.control-btn:active {
-    transform: scale(0.95);
+.settings-content {
+    background-color: #f8f9fa;
+    border: 2px solid #e9ecef;
+    border-radius: 12px;
+    padding: 20px;
+    margin-top: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.settings-content.hidden {
+    display: none;
+}
+
+.difficulty-controls {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #dee2e6;
+}
+
+.difficulty-controls label {
+    display: block;
+    margin-bottom: 10px;
+    font-weight: bold;
+    color: #495057;
+}
+
+.difficulty-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+.difficulty-btn {
+    background-color: #e9ecef;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: #495057;
+}
+
+.difficulty-btn:hover {
+    background-color: #dee2e6;
+}
+
+.difficulty-btn.active {
+    background-color: #0078d7;
+    color: white;
 }
 
 /* Message Box */
