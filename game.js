@@ -10,7 +10,10 @@ const CONFIG = {
     pointsPerLetter: 10,
     wordCompletionBonus: 50,
     movementDelay: 200,
-    defaultMusicVolume: 0.5
+    defaultMusicVolume: 0.5,
+    broccoliCount: 1,  // Single broccoli that chases
+    broccoliMoveDelay: 1000,  // How often broccoli moves (in ms)
+    defaultWordsPerDifficulty: 5
 };
 
 // Game state
@@ -21,9 +24,11 @@ const gameState = {
     collectedLetters: '',
     cookieMonsterPosition: { x: 0, y: 0 },
     letterPositions: [],
+    broccoliPosition: null,  // Single broccoli position
     canMove: true,
     difficulty: CONFIG.initialDifficulty,
-    musicPlaying: true
+    musicPlaying: true,
+    broccoliMoveTimer: null  // Timer for broccoli movement
 };
 
 // DOM Elements
@@ -55,13 +60,34 @@ const downButton = document.getElementById('down-btn');
 const leftButton = document.getElementById('left-btn');
 const rightButton = document.getElementById('right-btn');
 
+// Additional DOM Elements for settings
+const settingsToggle = document.getElementById('settings-toggle');
+const settingsPanel = document.getElementById('settings-panel');
+const apiKeyInput = document.getElementById('api-key');
+const saveApiKeyBtn = document.getElementById('save-api-key');
+const generateVocabBtn = document.getElementById('generate-vocab');
+const toggleVocabBtn = document.getElementById('toggle-vocab');
+const wordCountInput = document.getElementById('word-count');
+const apiStatus = document.getElementById('api-status');
+
 /**
  * Initialize the game
  */
 function initGame() {
+    console.log('Initializing game...');
+    
+    // Make sure all DOM elements are available
+    if (!gameBoard || !scoreDisplay || !currentWordDisplay || !wordTranslationDisplay || 
+        !collectedLettersDisplay || !messageBox || !levelCompleteModal || 
+        !completedWordDisplay || !wordMeaningDisplay || !nextWordButton) {
+        console.error('Some game elements are missing from the DOM');
+        return;
+    }
+
     createGameBoard();
     setupEventListeners();
     setupBackgroundMusic();
+    setupSettings();
     startNewWord();
 }
 
@@ -150,9 +176,17 @@ function toggleMusic() {
  * Create the game board grid
  */
 function createGameBoard() {
+    console.log('Creating game board...');
+    
+    // Clear existing board
+    while (gameBoard.firstChild) {
+        gameBoard.removeChild(gameBoard.firstChild);
+    }
+
     gameBoard.style.gridTemplateColumns = `repeat(${CONFIG.boardSize}, 1fr)`;
     gameBoard.style.gridTemplateRows = `repeat(${CONFIG.boardSize}, 1fr)`;
     
+    let cellCount = 0;
     for (let y = 0; y < CONFIG.boardSize; y++) {
         for (let x = 0; x < CONFIG.boardSize; x++) {
             const cell = document.createElement('div');
@@ -160,8 +194,10 @@ function createGameBoard() {
             cell.dataset.x = x;
             cell.dataset.y = y;
             gameBoard.appendChild(cell);
+            cellCount++;
         }
     }
+    console.log(`Created ${cellCount} cells in the game board`);
 }
 
 /**
@@ -219,11 +255,25 @@ function handleKeyPress(event) {
  * Start a new word challenge
  */
 function startNewWord() {
+    console.log('Starting new word...');
+    
+    // Stop any existing broccoli movement
+    if (gameState.broccoliMoveTimer) {
+        clearInterval(gameState.broccoliMoveTimer);
+        gameState.broccoliMoveTimer = null;
+    }
+    
     // Clear the board
     clearBoard();
     
+    // Reset game state
+    gameState.canMove = true;
+    gameState.broccoliPosition = null;
+    
     // Get a new random word
     gameState.currentWord = getRandomWord(gameState.difficulty);
+    console.log('Selected word:', gameState.currentWord);
+    
     gameState.targetWord = gameState.currentWord.word;
     gameState.collectedLetters = '';
     
@@ -237,13 +287,20 @@ function startNewWord() {
     createLetterSlots();
     
     // Place Cookie Monster
+    console.log('Placing Cookie Monster...');
     placeCookieMonster();
     
     // Place letters on the board
+    console.log('Placing letters...');
     placeLettersOnBoard();
     
+    // Place broccoli obstacle
+    console.log('Placing broccoli...');
+    placeBroccoli();
+    
     // Update message
-    messageBox.textContent = 'Find the correct German spelling for this English word!';
+    messageBox.textContent = 'Find the correct German spelling for this English word! Watch out for the angry broccoli!';
+    console.log('New word setup complete');
 }
 
 /**
@@ -273,7 +330,7 @@ function createLetterSlots() {
 }
 
 /**
- * Place Cookie Monster on the board using a custom PNG image
+ * Place Cookie Monster on the board
  */
 function placeCookieMonster() {
     // Random starting position
@@ -281,21 +338,27 @@ function placeCookieMonster() {
     const y = Math.floor(Math.random() * CONFIG.boardSize);
     
     gameState.cookieMonsterPosition = { x, y };
+    console.log('Cookie Monster position:', gameState.cookieMonsterPosition);
     
     const cell = getCellAtPosition(x, y);
+    if (!cell) {
+        console.error('Invalid cell position for Cookie Monster');
+        return;
+    }
     
-    // Create an image element instead of the CSS-based Cookie Monster
+    // Create Cookie Monster element
     const cookieMonster = document.createElement('div');
     cookieMonster.className = 'cookie-monster';
     
     // Create and add the image
     const cookieMonsterImg = document.createElement('img');
-    cookieMonsterImg.src = 'cookie-monster.png'; // Use your custom PNG file
+    cookieMonsterImg.src = 'cookie-monster.png';
     cookieMonsterImg.alt = 'Cookie Monster';
     cookieMonsterImg.className = 'cookie-monster-img';
     
     cookieMonster.appendChild(cookieMonsterImg);
     cell.appendChild(cookieMonster);
+    console.log('Cookie Monster placed successfully');
 }
 
 /**
@@ -303,8 +366,9 @@ function placeCookieMonster() {
  */
 function placeLettersOnBoard() {
     const word = gameState.targetWord;
-    gameState.letterPositions = [];
+    console.log('Placing letters for word:', word);
     
+    gameState.letterPositions = [];
     const usedPositions = [gameState.cookieMonsterPosition];
     
     // Place each letter of the word
@@ -315,13 +379,17 @@ function placeLettersOnBoard() {
                 x: Math.floor(Math.random() * CONFIG.boardSize),
                 y: Math.floor(Math.random() * CONFIG.boardSize)
             };
-            // Make sure we don't place a letter where one already exists
         } while (isPositionUsed(position, usedPositions));
         
         usedPositions.push(position);
         gameState.letterPositions.push({ letter: word[i], position, collected: false });
         
         const cell = getCellAtPosition(position.x, position.y);
+        if (!cell) {
+            console.error('Invalid cell position for letter:', word[i], position);
+            continue;
+        }
+        
         const cookieLetter = document.createElement('div');
         cookieLetter.className = 'cookie-letter';
         cookieLetter.textContent = word[i];
@@ -329,7 +397,9 @@ function placeLettersOnBoard() {
         cookieLetter.dataset.index = i;
         
         cell.appendChild(cookieLetter);
+        console.log('Placed letter:', word[i], 'at position:', position);
     }
+    console.log('All letters placed');
 }
 
 /**
@@ -343,7 +413,11 @@ function isPositionUsed(position, usedPositions) {
  * Get a cell at a specific position
  */
 function getCellAtPosition(x, y) {
-    return document.querySelector(`.cell[data-x="${x}"][data-y="${y}"]`);
+    const cell = document.querySelector(`.cell[data-x="${x}"][data-y="${y}"]`);
+    if (!cell) {
+        console.error('Could not find cell at position:', x, y);
+    }
+    return cell;
 }
 
 /**
@@ -357,6 +431,14 @@ function movePlayer(dx, dy) {
     
     // Check if move is valid
     if (newX < 0 || newX >= CONFIG.boardSize || newY < 0 || newY >= CONFIG.boardSize) {
+        return;
+    }
+    
+    // Check if there's a broccoli at the new position
+    if (gameState.broccoliPosition && 
+        gameState.broccoliPosition.x === newX && 
+        gameState.broccoliPosition.y === newY) {
+        handleBroccoliCatch();
         return;
     }
     
@@ -470,5 +552,209 @@ function completeWord() {
     }
 }
 
-// Initialize the game when the page loads
-window.addEventListener('load', initGame);
+/**
+ * Place broccoli on the board
+ */
+function placeBroccoli() {
+    // Start broccoli at the opposite corner from Cookie Monster
+    const position = {
+        x: gameState.cookieMonsterPosition.x === 0 ? CONFIG.boardSize - 1 : 0,
+        y: gameState.cookieMonsterPosition.y === 0 ? CONFIG.boardSize - 1 : 0
+    };
+    
+    gameState.broccoliPosition = position;
+    
+    const cell = getCellAtPosition(position.x, position.y);
+    
+    // Create broccoli container
+    const broccoliContainer = document.createElement('div');
+    broccoliContainer.className = 'broccoli-container';
+    
+    // Create broccoli
+    const broccoli = document.createElement('div');
+    broccoli.className = 'broccoli angry'; // Make it look angry since it's chasing
+    
+    // Create broccoli stem
+    const stem = document.createElement('div');
+    stem.className = 'broccoli-stem';
+    broccoli.appendChild(stem);
+    
+    // Create broccoli head
+    const head = document.createElement('div');
+    head.className = 'broccoli-head';
+    broccoli.appendChild(head);
+    
+    // Create broccoli eyes
+    const eyes = document.createElement('div');
+    eyes.className = 'broccoli-eyes';
+    
+    const leftEye = document.createElement('div');
+    leftEye.className = 'broccoli-eye left';
+    eyes.appendChild(leftEye);
+    
+    const rightEye = document.createElement('div');
+    rightEye.className = 'broccoli-eye right';
+    eyes.appendChild(rightEye);
+    
+    broccoli.appendChild(eyes);
+    broccoliContainer.appendChild(broccoli);
+    cell.appendChild(broccoliContainer);
+    
+    // Start broccoli movement
+    startBroccoliMovement();
+}
+
+/**
+ * Move broccoli towards Cookie Monster
+ */
+function moveBroccoli() {
+    if (!gameState.broccoliPosition) return;
+    
+    // Calculate direction to move (simple chase AI)
+    const dx = Math.sign(gameState.cookieMonsterPosition.x - gameState.broccoliPosition.x);
+    const dy = Math.sign(gameState.cookieMonsterPosition.y - gameState.broccoliPosition.y);
+    
+    // Choose horizontal or vertical movement based on which gets closer
+    const moveHorizontal = Math.abs(gameState.cookieMonsterPosition.x - gameState.broccoliPosition.x) > 
+                          Math.abs(gameState.cookieMonsterPosition.y - gameState.broccoliPosition.y);
+    
+    const newX = gameState.broccoliPosition.x + (moveHorizontal ? dx : 0);
+    const newY = gameState.broccoliPosition.y + (!moveHorizontal ? dy : 0);
+    
+    // Check if move is valid
+    if (newX < 0 || newX >= CONFIG.boardSize || newY < 0 || newY >= CONFIG.boardSize) {
+        return;
+    }
+    
+    // Check if new position has a letter
+    const newCell = getCellAtPosition(newX, newY);
+    if (newCell.querySelector('.cookie-letter')) {
+        return;
+    }
+    
+    // Move broccoli
+    const oldCell = getCellAtPosition(gameState.broccoliPosition.x, gameState.broccoliPosition.y);
+    const broccoliElement = oldCell.querySelector('.broccoli-container');
+    oldCell.removeChild(broccoliElement);
+    newCell.appendChild(broccoliElement);
+    
+    // Update position
+    gameState.broccoliPosition = { x: newX, y: newY };
+    
+    // Check if caught Cookie Monster
+    if (newX === gameState.cookieMonsterPosition.x && newY === gameState.cookieMonsterPosition.y) {
+        handleBroccoliCatch();
+    }
+}
+
+/**
+ * Start broccoli movement timer
+ */
+function startBroccoliMovement() {
+    if (gameState.broccoliMoveTimer) {
+        clearInterval(gameState.broccoliMoveTimer);
+    }
+    gameState.broccoliMoveTimer = setInterval(moveBroccoli, CONFIG.broccoliMoveDelay);
+}
+
+/**
+ * Handle when broccoli catches Cookie Monster
+ */
+function handleBroccoliCatch() {
+    errorSound.play();
+    messageBox.textContent = 'Oh no! The broccoli caught Cookie Monster!';
+    gameState.canMove = false;
+    
+    // Stop broccoli movement
+    if (gameState.broccoliMoveTimer) {
+        clearInterval(gameState.broccoliMoveTimer);
+    }
+    
+    // Restart the current word after a delay
+    setTimeout(() => {
+        startNewWord();
+    }, 2000);
+}
+
+/**
+ * Set up settings panel and vocabulary generation
+ */
+function setupSettings() {
+    // Settings toggle
+    settingsToggle.addEventListener('click', () => {
+        settingsPanel.classList.toggle('hidden');
+    });
+    
+    // Generate new vocabulary
+    generateVocabBtn.addEventListener('click', async () => {
+        const wordsPerDifficulty = parseInt(wordCountInput.value) || CONFIG.defaultWordsPerDifficulty;
+        
+        generateVocabBtn.disabled = true;
+        showApiStatus('Generating new vocabulary...');
+        
+        try {
+            // Generate words for each difficulty level
+            const allWords = [];
+            for (let difficulty = 1; difficulty <= 3; difficulty++) {
+                const response = await fetch('/api/generate-vocabulary', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        count: wordsPerDifficulty,
+                        difficulty: difficulty
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to generate vocabulary');
+                }
+                
+                const words = await response.json();
+                allWords.push(...words);
+            }
+            
+            // Update the vocabulary
+            dynamicGermanWords = allWords;
+            germanWords = [...dynamicGermanWords];
+            isUsingDynamicWords = true;
+            
+            showApiStatus('New vocabulary generated successfully!');
+            startNewWord(); // Start a new word with the new vocabulary
+            
+        } catch (error) {
+            console.error('Error generating vocabulary:', error);
+            showApiStatus('Failed to generate vocabulary. Using built-in words.', true);
+            
+            // Fallback to static vocabulary
+            germanWords = [...staticGermanWords];
+            isUsingDynamicWords = false;
+            
+        } finally {
+            generateVocabBtn.disabled = false;
+        }
+    });
+    
+    // Toggle vocabulary mode
+    toggleVocabBtn.addEventListener('click', () => {
+        const isUsingDynamic = toggleVocabularyMode();
+        toggleVocabBtn.textContent = isUsingDynamic ? 'Use Static Words' : 'Use Dynamic Words';
+        showApiStatus(`Switched to ${isUsingDynamic ? 'dynamic' : 'static'} vocabulary`);
+        startNewWord(); // Start a new word with the selected vocabulary
+    });
+}
+
+/**
+ * Show status message in the settings panel
+ */
+function showApiStatus(message, isError = false) {
+    apiStatus.textContent = message;
+    apiStatus.className = 'api-status' + (isError ? ' error' : ' success');
+}
+
+// Wait for DOM to be fully loaded before initializing
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM loaded, initializing game...');
+    setTimeout(initGame, 100); // Small delay to ensure all resources are loaded
+});

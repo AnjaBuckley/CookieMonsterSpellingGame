@@ -1,0 +1,129 @@
+/* Settings panel styles */
+.settings-panel {
+    margin-bottom: 15px;
+    position: relative;
+}
+
+.settings-toggle-btn {
+    background-color: #f0f0f0;
+    border: 2px solid #ccc;
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.settings-toggle-btn:hover {
+    background-color: #e0e0e0;
+}
+
+.settings-content {
+    background-color: #f9f9f9;
+    border: 2px solid #ddd;
+    border-radius: 10px;
+    padding: 15px;
+    margin-top: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.hidden {
+    display: none;
+}
+
+.api-key-container {
+    margin-bottom: 15px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+}
+
+.api-key-container label {
+    font-weight: bold;
+    flex: 1 0 100%;
+}
+
+.api-key-container input {
+    flex: 1;
+    min-width: 200px;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-family: monospace;
+}
+
+.vocabulary-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.word-count-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+    width: 100%;
+}
+
+.word-count-container input {
+    width: 60px;
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    text-align: center;
+}
+
+.api-btn {
+    background-color: #0078d7;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 12px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.api-btn:hover:not(:disabled) {
+    background-color: #0056b3;
+}
+
+.api-btn:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.api-status {
+    padding: 8px;
+    border-radius: 4px;
+    background-color: #f0f0f0;
+    text-align: center;
+    font-style: italic;
+}
+
+.api-status.error {
+    background-color: #ffebee;
+    color: #c62828;
+}
+
+.api-status.success {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+}
+
+@media (max-width: 600px) {
+    .api-key-container,
+    .vocabulary-controls {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .api-key-container input {
+        width: 100%;
+    }
+}

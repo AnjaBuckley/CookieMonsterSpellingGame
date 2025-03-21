@@ -16,6 +16,24 @@
             </div>
         </header>
         
+        <!-- Add settings panel -->
+        <div class="settings-panel">
+            <button class="settings-toggle-btn" id="settings-toggle">
+                <span>⚙️</span> Settings
+            </button>
+            <div class="settings-content hidden" id="settings-panel">
+                <div class="vocabulary-controls">
+                    <button class="api-btn" id="generate-vocab">Generate New Words</button>
+                    <button class="api-btn" id="toggle-vocab">Use Static Words</button>
+                </div>
+                <div class="word-count-container">
+                    <label for="word-count">Words per difficulty:</label>
+                    <input type="number" id="word-count" value="5" min="1" max="10">
+                </div>
+                <div class="api-status" id="api-status"></div>
+            </div>
+        </div>
+        
         <div class="music-controls">
             <button id="toggle-music" class="music-btn">
                 <span id="music-icon">🔊</span>
@@ -79,6 +97,7 @@
     <!-- Background music -->
     <audio id="background-music" src="sounds/C_is_for_Cookie.mp3" loop preload="auto"></audio>
     
+    <!-- Load scripts -->
     <script src="words.js"></script>
     <script src="game.js"></script>
 </body>
