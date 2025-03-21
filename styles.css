@@ -12,7 +12,9 @@ body {
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    padding: 20px;
+    padding: 10px;
+    margin: 0;
+    overflow-x: hidden;
 }
 
 .game-container {
@@ -20,9 +22,37 @@ body {
     border-radius: 20px;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
     width: 100%;
-    max-width: 800px;
+    max-width: 1200px;
+    min-width: 320px;
     overflow: hidden;
-    padding: 20px;
+    padding: 15px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: minmax(320px, 800px) minmax(200px, 300px);
+    grid-gap: 15px;
+    align-items: start;
+    max-height: 98vh;
+}
+
+/* Main game area */
+.game-main {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    height: 100%;
+    max-height: calc(98vh - 30px);
+    overflow-y: auto;
+}
+
+/* Side controls area */
+.game-side-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    position: sticky;
+    top: 15px;
+    max-height: calc(98vh - 30px);
+    overflow-y: auto;
 }
 
 /* Header Styles */
@@ -30,7 +60,8 @@ header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
+    flex-shrink: 0;
 }
 
 h1 {
@@ -124,10 +155,8 @@ h1 {
 
 /* Word Display Styles */
 .word-display {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
+    flex-shrink: 0;
     background-color: #ffe8b8;
     border-radius: 15px;
     padding: 15px;
@@ -188,12 +217,14 @@ h1 {
     grid-template-rows: repeat(8, 1fr);
     gap: 5px;
     width: 100%;
+    max-width: 800px;
     aspect-ratio: 1/1;
     background-color: #e6f2ff;
     border-radius: 10px;
     padding: 10px;
-    margin-bottom: 20px;
+    margin: 0 auto;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    flex-shrink: 0;
 }
 
 .cell {
@@ -293,87 +324,17 @@ h1 {
 }
 
 .broccoli {
-    position: relative;
-    width: 80%;
-    height: 80%;
-    animation: wobble 2s infinite;
-}
-
-@keyframes wobble {
-    0% { transform: rotate(0deg); }
-    25% { transform: rotate(5deg); }
-    50% { transform: rotate(0deg); }
-    75% { transform: rotate(-5deg); }
-    100% { transform: rotate(0deg); }
-}
-
-.broccoli-stem {
-    position: absolute;
-    bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 30%;
-    height: 40%;
-    background-color: #5a9216;
-    border-radius: 0 0 5px 5px;
-}
-
-.broccoli-head {
-    position: absolute;
-    top: 0;
-    left: 50%;
-    transform: translateX(-50%);
     width: 90%;
-    height: 70%;
-    background-color: #3c7a0d;
-    border-radius: 50% 50% 40% 40%;
-    box-shadow: 0 4px 4px rgba(0, 0, 0, 0.2);
-}
-
-.broccoli-eyes {
-    position: absolute;
-    top: 30%;
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-    z-index: 2;
-}
-
-.broccoli-eye {
-    position: absolute;
-    width: 20%;
-    height: 20%;
-    background-color: white;
-    border-radius: 50%;
-    top: 30%;
-}
-
-.broccoli-eye.left {
-    left: 25%;
-}
-
-.broccoli-eye.right {
-    right: 25%;
-}
-
-.broccoli-eye::after {
-    content: '';
-    position: absolute;
-    width: 50%;
-    height: 50%;
-    background-color: black;
-    border-radius: 50%;
-    top: 25%;
-    left: 25%;
+    height: 90%;
+    background-image: url('./broccoli.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    animation: chase 0.5s infinite;
 }
 
 .broccoli.angry {
     animation: chase 0.5s infinite;
-}
-
-.broccoli.angry .broccoli-eye::after {
-    background-color: red;
 }
 
 /* Broccoli chase animation */
@@ -381,10 +342,6 @@ h1 {
     0% { transform: scale(1); }
     50% { transform: scale(1.1); }
     100% { transform: scale(1); }
-}
-
-.chase-animation {
-    animation: chase 0.5s infinite alternate;
 }
 
 /* Animation effects for Cookie Monster */
@@ -427,7 +384,7 @@ h1 {
     margin-bottom: 20px;
 }
 
-.control-btn.primary {
+.game-btn {
     background-color: #4CAF50;
     color: white;
     border: none;
@@ -438,29 +395,99 @@ h1 {
     transition: all 0.3s ease;
 }
 
-.control-btn.primary:hover {
+.game-btn:hover {
     background-color: #45a049;
+    transform: translateY(-2px);
 }
 
-.control-btn.danger {
+.game-btn:active {
+    transform: translateY(1px);
+}
+
+.game-btn.start {
+    background-color: #4CAF50;
+}
+
+.game-btn.stop {
     background-color: #f44336;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    padding: 12px 24px;
-    font-size: 16px;
-    cursor: pointer;
-    transition: all 0.3s ease;
 }
 
-.control-btn.danger:hover {
+.game-btn.stop:hover {
     background-color: #da190b;
 }
 
-.control-btn:disabled {
+.game-btn:disabled {
     background-color: #cccccc;
     cursor: not-allowed;
     opacity: 0.7;
+    transform: none;
+}
+
+/* Direction Controls */
+.direction-controls {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    margin: 20px 0;
+}
+
+.controls-row {
+    display: flex;
+    gap: 5px;
+    justify-content: center;
+}
+
+.direction-btn {
+    width: 60px;
+    height: 60px;
+    border: none;
+    border-radius: 12px;
+    background: linear-gradient(145deg, #0078d7, #005fb3);
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2),
+                inset 0 1px 1px rgba(255, 255, 255, 0.3);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.direction-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.3),
+                inset 0 1px 1px rgba(255, 255, 255, 0.3);
+    background: linear-gradient(145deg, #0088f7, #0069c8);
+}
+
+.direction-btn:active {
+    transform: translateY(1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2),
+                inset 0 1px 1px rgba(255, 255, 255, 0.3);
+    background: linear-gradient(145deg, #005fb3, #0078d7);
+}
+
+.direction-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, 
+        rgba(255, 255, 255, 0),
+        rgba(255, 255, 255, 0.3),
+        rgba(255, 255, 255, 0));
+}
+
+/* Special styling for up button */
+#up-btn {
+    margin-bottom: 5px;
 }
 
 /* Settings Panel */
@@ -542,11 +569,11 @@ h1 {
 
 /* Message Box */
 .message-box {
-    min-height: 30px;
+    margin-bottom: 10px;
+    flex-shrink: 0;
     text-align: center;
     font-size: 18px;
     color: #0078d7;
-    margin-bottom: 15px;
     font-weight: bold;
     padding: 10px;
     border-radius: 8px;
@@ -581,16 +608,36 @@ h1 {
     border-radius: 10px;
     padding: 15px;
     margin-top: 10px;
+    border: 2px solid #e1eeff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .instructions h3 {
     color: #0078d7;
-    margin-bottom: 10px;
+    margin-bottom: 12px;
+    font-size: 18px;
+    text-align: center;
+    border-bottom: 2px dashed #0078d7;
+    padding-bottom: 8px;
 }
 
 .instructions p {
-    margin-bottom: 5px;
+    margin-bottom: 8px;
     color: #444;
+    font-size: 14px;
+    line-height: 1.4;
+    padding-left: 8px;
+}
+
+.instructions .warning {
+    background-color: #fff3cd;
+    border: 1px solid #ffeeba;
+    border-radius: 6px;
+    padding: 8px;
+    margin-top: 12px;
+    color: #856404;
+    font-size: 13px;
+    text-align: center;
 }
 
 /* Game Over Modal */
@@ -690,7 +737,44 @@ h1 {
 }
 
 /* Responsive Styles */
+@media (max-width: 1024px) {
+    .game-container {
+        grid-template-columns: 1fr;
+        max-width: 800px;
+        height: auto;
+        max-height: none;
+    }
+
+    .game-main {
+        max-height: none;
+        overflow-y: visible;
+    }
+
+    .game-side-controls {
+        position: static;
+        max-height: none;
+        overflow-y: visible;
+    }
+
+    .game-board {
+        max-width: 100%;
+    }
+}
+
 @media (max-width: 600px) {
+    body {
+        padding: 5px;
+    }
+
+    .game-container {
+        padding: 10px;
+        border-radius: 10px;
+    }
+
+    .game-board {
+        padding: 5px;
+    }
+
     h1 {
         font-size: 20px;
     }
@@ -699,9 +783,15 @@ h1 {
         font-size: 28px;
     }
     
-    .control-btn {
+    .direction-btn {
         width: 50px;
         height: 50px;
+        font-size: 20px;
+    }
+    
+    .game-btn {
+        padding: 10px 20px;
+        font-size: 14px;
     }
     
     .music-controls {

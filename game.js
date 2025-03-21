@@ -610,31 +610,8 @@ function placeBroccoli() {
     
     // Create broccoli
     const broccoli = document.createElement('div');
-    broccoli.className = 'broccoli angry'; // Make it look angry since it's chasing
+    broccoli.className = 'broccoli angry';
     
-    // Create broccoli stem
-    const stem = document.createElement('div');
-    stem.className = 'broccoli-stem';
-    broccoli.appendChild(stem);
-    
-    // Create broccoli head
-    const head = document.createElement('div');
-    head.className = 'broccoli-head';
-    broccoli.appendChild(head);
-    
-    // Create broccoli eyes
-    const eyes = document.createElement('div');
-    eyes.className = 'broccoli-eyes';
-    
-    const leftEye = document.createElement('div');
-    leftEye.className = 'broccoli-eye left';
-    eyes.appendChild(leftEye);
-    
-    const rightEye = document.createElement('div');
-    rightEye.className = 'broccoli-eye right';
-    eyes.appendChild(rightEye);
-    
-    broccoli.appendChild(eyes);
     broccoliContainer.appendChild(broccoli);
     cell.appendChild(broccoliContainer);
     
