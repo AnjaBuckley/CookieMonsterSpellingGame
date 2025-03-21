@@ -750,7 +750,25 @@ function showGameOver() {
     gameOverText.className = 'game-over-text';
     gameOverText.textContent = 'GAME OVER';
     
+    const playAgainBtn = document.createElement('button');
+    playAgainBtn.className = 'play-again-btn';
+    playAgainBtn.textContent = 'Play Again';
+    playAgainBtn.onclick = () => {
+        // Remove the game over overlay
+        gameBoard.removeChild(overlay);
+        
+        // Reset game state
+        gameState.score = 0;
+        gameState.lives = CONFIG.initialLives;
+        scoreDisplay.textContent = '0';
+        updateLives();
+        
+        // Start a new game
+        startGame();
+    };
+    
     overlay.appendChild(gameOverText);
+    overlay.appendChild(playAgainBtn);
     gameBoard.appendChild(overlay);
     
     messageBox.textContent = `Game Over! The broccoli won! Final Score: ${gameState.score}`;
@@ -867,8 +885,16 @@ function stopGame() {
     gameState.isGameRunning = false;
     gameState.isInvulnerable = false;
     
-    // Clear the board
-    clearBoard();
+    // Clear the board (but don't remove game over overlay if it exists)
+    const cells = document.querySelectorAll('.cell');
+    cells.forEach(cell => {
+        const children = Array.from(cell.children);
+        children.forEach(child => {
+            if (!child.classList.contains('game-over-overlay')) {
+                cell.removeChild(child);
+            }
+        });
+    });
     
     // Stop broccoli movement
     if (gameState.broccoliMoveTimer) {

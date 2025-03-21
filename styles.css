@@ -845,8 +845,10 @@ h1 {
     bottom: 0;
     background-color: rgba(0, 0, 0, 0.8);
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
+    gap: 30px;
     z-index: 100;
     border-radius: 10px;
     animation: fadeIn 0.5s ease-in;
@@ -859,6 +861,49 @@ h1 {
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
     transform: rotate(-10deg);
     animation: gameOverPulse 2s infinite;
+}
+
+.play-again-btn {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 30px;
+    padding: 15px 40px;
+    font-size: 24px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    animation: bounceIn 0.5s ease-out 0.5s both;
+}
+
+.play-again-btn:hover {
+    background-color: #45a049;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+}
+
+.play-again-btn:active {
+    transform: translateY(1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+@keyframes bounceIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.3);
+    }
+    50% {
+        opacity: 0.9;
+        transform: scale(1.1);
+    }
+    80% {
+        opacity: 1;
+        transform: scale(0.89);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
 }
 
 @keyframes fadeIn {
