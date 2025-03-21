@@ -48,6 +48,7 @@ const nextWordButton = document.getElementById('next-word-btn');
 const nomSound = document.getElementById('nom-sound');
 const errorSound = document.getElementById('error-sound');
 const completeSound = document.getElementById('complete-sound');
+const notVeggieSound = document.getElementById('not-veggie-sound');
 
 // Background music
 const backgroundMusic = document.getElementById('background-music');
@@ -676,7 +677,7 @@ function startBroccoliMovement() {
  * Handle when broccoli catches Cookie Monster
  */
 function handleBroccoliCatch() {
-    errorSound.play();
+    notVeggieSound.play();
     messageBox.textContent = 'Oh no! The broccoli caught Cookie Monster!';
     gameState.canMove = false;
     
