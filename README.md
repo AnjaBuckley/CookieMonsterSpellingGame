@@ -2,6 +2,11 @@
 
 A fun and educational language learning game where Cookie Monster helps you learn German vocabulary! Collect letters to spell German words while avoiding the angry broccoli.
 
+<img width="1189" alt="Screenshot 2025-03-29 at 16 21 05" src="https://github.com/user-attachments/assets/ebc605f6-e7f8-4e4b-8b0d-4619cf09d893" />
+<img width="1146" alt="Screenshot 2025-03-29 at 16 21 41" src="https://github.com/user-attachments/assets/3029de34-9e0c-47b0-a965-f19f9c9507d8" />
+
+
+
 ## Features
 
 - 🎮 Interactive game board with Cookie Monster character
